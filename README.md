@@ -1,4 +1,4 @@
-# nasrt
+# Nasrt
 
 ## Setup
 
