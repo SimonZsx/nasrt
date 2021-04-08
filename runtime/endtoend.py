@@ -72,11 +72,29 @@ if __name__ == '__main__':
     best_acc = 0.0
     acc_list = list()
     best_choice = list()
-    for itr in range(args.random_search):
-        choice = utils.random_choice(args.num_choices, args.layers)
+    for itr in range(args.random_search): ## total num of searchs
+        choices  = []
+        for total in range(args.search_batch): ## per batch 
+            choice = utils.random_choice(args.num_choices, args.layers)
+            choices.append(choice)
         print('Choice:' + str(choice))
+
+        # ### Schedule 
+
+        # sched = schedule(choices, previous_choices, )
+
+        # ## Per worker train
+        # dits
+        ####
+
         for epoch in range(50):
-            train(args, epoch, train_loader, device, model, criterion, optimizer, scheduler, supernet=True, choice=choice)
+            graft = False
+            if epoch == 49:
+                graft = True
+            train(args, epoch, train_loader, device, model, criterion, optimizer, scheduler, supernet=True, choice=choice, graft = graft)
+        ##
+
+
         top1_acc = validate(args, itr, val_loader, device, model, criterion, supernet=True, choice=choice)
         acc_list.append([top1_acc, itr, choice])
         if best_acc < top1_acc:
