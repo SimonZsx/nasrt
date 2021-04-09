@@ -53,8 +53,8 @@ def main():
                             else (torch.randn(1, 3, 224, 224),), verbose=False)
     # print(model)
     print('Random Path of the Supernet: Params: %.2fM, Flops:%.2fM' % ((params / 1e6), (flops / 1e6)))
-    # model = model.persist_to_cuda(device)
-    model = model.to(device)
+    model = model.persist_to_cuda(device)
+    # model = model.to(device)
     summary(model, (3, 32, 32) if args.dataset == 'cifar10' else (3, 224, 224))
 
     # train supernet

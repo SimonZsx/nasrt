@@ -9,6 +9,7 @@ def get_args():
     parser.add_argument('--layers', type=int, default=20, help='batch size')
     parser.add_argument('--num_choices', type=int, default=4, help='number choices per layer')
     parser.add_argument('--batch_size', type=int, default=96, help='batch size')
+    parser.add_argument('--search_batch', type=int, default=100, help='total search number')
     parser.add_argument('--epochs', type=int, default=600, help='batch size')
     parser.add_argument('--learning_rate', type=float, default=0.025, help='initial learning rate')
     parser.add_argument('--momentum', type=float, default=0.9, help='momentum')
@@ -21,6 +22,8 @@ def get_args():
     parser.add_argument('--cutout_length', type=int, default=16, help='cutout length')
     parser.add_argument('--auto_aug', action='store_true', default=False, help='use auto augmentation')
     parser.add_argument('--resize', action='store_true', default=False, help='use resize')
+    # schedule parameter
+    parser.add_argument('--schedule', type=int, default=0, help='0-scheduler,1-worker')
     args = parser.parse_args()
     print(args)
     return args

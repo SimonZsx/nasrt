@@ -33,9 +33,9 @@ def get_activation_output_by_index(index, q):
     
     return hook
 
-def save_io(input_q, output_q):
+# def save_io(input_q, output_q):
 
-    while True:
+#     while True:
 
 
 def train(args, epoch, train_data, device, model, criterion, optimizer, scheduler, supernet, choice=None, graft=False):
@@ -159,3 +159,31 @@ def validate(args, epoch, val_data, device, model, criterion, supernet=False, ch
         print('[Val_Accuracy epoch:%d] val_loss:%f, val_acc:%f'
               % (epoch + 1, val_loss / (step + 1), val_top1.avg))
         return val_top1.avg
+
+def spostrain(args, epoch, train_data, device, model, criterion, optimizer, scheduler, supernet):
+    model.train()
+    train_loss = 0.0
+    top1 = utils.AvgrageMeter()
+    train_data = tqdm(train_data)
+    train_data.set_description('[%s%04d/%04d %s%f]' % ('Epoch:', epoch + 1, args.epochs, 'lr:', scheduler.get_lr()[0]))
+    for step, (inputs, targets) in enumerate(train_data):
+        inputs, targets = inputs.to(device), targets.to(device)
+        optimizer.zero_grad()
+        if supernet:
+            choice = utils.random_choice(args.num_choices, args.layers)
+            outputs = model(inputs, choice)
+        else:
+            outputs = model(inputs)
+        loss = criterion(outputs, targets)
+        # if args.dataset == 'cifar10':
+        loss.backward()
+        # elif args.dataset == 'imagenet':
+        #     with amp.scale_loss(loss, optimizer) as scaled_loss:
+        #         scaled_loss.backward()
+        optimizer.step()
+        prec1, prec5 = utils.accuracy(outputs, targets, topk=(1, 5))
+        n = inputs.size(0)
+        top1.update(prec1.item(), n)
+        train_loss += loss.item()
+        postfix = {'train_loss': '%.6f' % (train_loss / (step + 1)), 'train_acc': '%.6f' % top1.avg}
+        train_data.set_postfix(log=postfix)
