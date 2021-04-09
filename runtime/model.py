@@ -34,14 +34,14 @@ class NasModel(nn.Module):
         self.layers = layers
         self.kernel_list = [3, 5, 7, 'x']
 
-        # Persistent Ops
+        # Persistent Ops - Fixed during training 
         self.persist = nn.Sequential(
             nn.Conv2d(3, channel[0], kernel_size=3, stride=first_stride, padding=1, bias=False),
             nn.BatchNorm2d(channel[0], affine=False),
             nn.ReLU6(inplace=True)
         )
 
-        # op list 
+        # Choices part. Operator list 
         self.choice_block = nn.ModuleList([])
         for i in range(layers):
             if i in self.downsample_layers:
@@ -85,6 +85,15 @@ class NasModel(nn.Module):
 
         #self.move_to_cpu
         return x
+
+    def forward_graft(self, x, start, end, choice):
+        choice = choice[start:end]
+        for i, j in enumerate(choice):
+            x = self.choice_block[i][j](x)
+        return x
+
+    def hook_(self, i, j, hook):
+        self.choice_block[i][j].register_forward_hook(hook)
 
     def persist_to_cuda(self, device):
         self.persist.to(device)
